@@ -8,6 +8,7 @@ import org.apache.spark.sql.SparkSession;
 
 /**
  * TestDataGenerator
+ * Join node_id and term1 to generate taxonomy test data for team internal.
  *
  * @author cn-seo-dev@
  */
@@ -32,6 +33,14 @@ public class TestDataGenerator {
                 .csv(outputPath);
     }
 
+    /**
+     * Combine node_id, store_name and seoterm1 columns
+     *
+     * @param nodeIdPath
+     * @param storeNamePath
+     * @param termPath
+     * @param outputPath
+     */
     private void run(final String nodeIdPath, final String storeNamePath, final String termPath, final String outputPath) {
         final Dataset<Row> nodeIdDF = read(nodeIdPath)
                 .select("Node Id")
@@ -43,8 +52,6 @@ public class TestDataGenerator {
                 .select("NodeId", "SEOTerm1")
                 .withColumnRenamed("NodeId", "node_id")
                 .withColumnRenamed("SEOTerm1", "term");
-
-        System.out.println(nodeIdDF.count() + ", distinct: " + nodeIdDF.distinct().count());
 
         // 内连接：连接的行"node_id"只会出现一次
         final Dataset<Row> joinDF = nodeIdDF.join(storeNameDF,"node_id")
@@ -64,7 +71,8 @@ public class TestDataGenerator {
         final String nodeIdPath = "/Users/jcsai/Downloads/nodeId";
         final String storeNamePath = "/Users/jcsai/Downloads/storeName";
         final String termPath = "/Users/jcsai/Downloads/term";
-        final String outputPath = "/Users/jcsai/Downloads/taxonomytestdata";
+        final String outputPath = "/Users/jcsai/Downloads/taxonomytestdata1";
+
         generator.run(nodeIdPath, storeNamePath, termPath, outputPath);
     }
 }
