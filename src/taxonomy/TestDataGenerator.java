@@ -21,6 +21,7 @@ public class TestDataGenerator {
         return this.sparkSession.read()
                 .option("delimiter", "\t")
                 .option("header", true)
+                .option("encoding", "UTF-8")
                 .csv(inputPath);
     }
 
@@ -30,6 +31,8 @@ public class TestDataGenerator {
                 .mode(SaveMode.Overwrite)
                 .option("delimiter", "\t")
                 .option("header", true)
+                .option("quote", "")
+                .option("encoding", "UTF-8")
                 .csv(outputPath);
     }
 
@@ -57,6 +60,7 @@ public class TestDataGenerator {
         final Dataset<Row> joinDF = nodeIdDF.join(storeNameDF,"node_id")
                 .join(termDF, "node_id")
                 .sort("store_name", "node_id")
+                .sort("node_id")
                 .distinct();
 
         joinDF.show();
@@ -68,10 +72,10 @@ public class TestDataGenerator {
         final SparkSession sparkSession = SparkSession.builder().master("local").appName("test").getOrCreate();
         final TestDataGenerator generator = new TestDataGenerator(sparkSession);
 
-        final String nodeIdPath = "/Users/jcsai/Downloads/nodeId";
+        final String nodeIdPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/23595_node_experiment/23595_node.txt";
         final String storeNamePath = "/Users/jcsai/Downloads/storeName";
-        final String termPath = "/Users/jcsai/Downloads/term";
-        final String outputPath = "/Users/jcsai/Downloads/taxonomytestdata1";
+        final String termPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/23595_node_experiment/term_remove_records_without_nodeId.txt";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/23595_node_experiment/testdata_remove_records_without_nodeId";
 
         generator.run(nodeIdPath, storeNamePath, termPath, outputPath);
     }
