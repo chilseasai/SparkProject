@@ -9,6 +9,13 @@ import org.apache.spark.sql.SparkSession;
 /**
  * ExtractDataFromTommySearch
  *
+ * spark-submit --deploy-mode cluster
+ * --master yarn --deploy-mode cluster
+ * --class trafficdata.ExtractDataFromTommySearch
+ * s3://clickstream-full3/tommy-searches/TommySearchesExtraction.jar
+ * s3://a9-sa-data-tommy-datasets-prod/tommy-searches-parquet/us/20180731/part-*.gz.parquet
+ * s3a://clickstream-full3/tommy-searches/1/20180731 100
+ *
  * @author cn-seo-dev@
  */
 @RequiredArgsConstructor
