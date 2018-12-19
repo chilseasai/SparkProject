@@ -24,7 +24,8 @@ public class WordCount {
         JavaPairRDD<String, Integer> counts = textFile
                 .flatMap(s -> Arrays.asList(s.split(" ")).iterator())
                 .mapToPair(word -> new Tuple2<>(word, 1))
-                .reduceByKey((a, b) -> a + b);
+                .reduceByKey((a, b) -> a + b)
+                .repartition(1);
         counts.saveAsTextFile(outputPath);
     }
 
@@ -32,11 +33,11 @@ public class WordCount {
         final SparkConf sparkConf = new SparkConf().setAppName("wordCount");
         final JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
-//        final String inputPath = "/Users/jcsai/IdeaProjects/SparkProject/testdata/wordcount/input";
-//        final String outputPath = "/Users/jcsai/IdeaProjects/SparkProject/testdata/wordcount/output";
+        final String inputPath = "/Users/jcsai/IdeaProjects/SparkProject/testdata/wordcount/input";
+        final String outputPath = "/Users/jcsai/IdeaProjects/SparkProject/testdata/wordcount/output";
 
-        final String inputPath = args[0];
-        final String outputPath = args[1];
+//        final String inputPath = args[0];
+//        final String outputPath = args[1];
 
         final WordCount wordCount = new WordCount(sc);
         wordCount.count(inputPath, outputPath);
