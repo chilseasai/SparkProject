@@ -48,18 +48,19 @@ public class TestDataGenerator {
         final Dataset<Row> nodeIdDF = read(nodeIdPath)
                 .select("Node Id")
                 .withColumnRenamed("Node Id", "node_id");
-        final Dataset<Row> storeNameDF = read(storeNamePath)
-                .select("Node IDs", "store_name")
-                .withColumnRenamed("Node IDs", "node_id");
+//        final Dataset<Row> storeNameDF = read(storeNamePath)
+//                .select("Node IDs", "store_name")
+//                .withColumnRenamed("Node IDs", "node_id");
         final Dataset<Row> termDF = read(termPath)
                 .select("NodeId", "SEOTerm1")
                 .withColumnRenamed("NodeId", "node_id")
                 .withColumnRenamed("SEOTerm1", "term");
 
         // 内连接：连接的行"node_id"只会出现一次
-        final Dataset<Row> joinDF = nodeIdDF.join(storeNameDF,"node_id")
+        final Dataset<Row> joinDF = nodeIdDF
+//                .join(storeNameDF,"node_id")
                 .join(termDF, "node_id")
-                .sort("store_name", "node_id")
+//                .sort("store_name", "node_id")
                 .sort("node_id")
                 .distinct();
 
@@ -72,10 +73,10 @@ public class TestDataGenerator {
         final SparkSession sparkSession = SparkSession.builder().master("local").appName("test").getOrCreate();
         final TestDataGenerator generator = new TestDataGenerator(sparkSession);
 
-        final String nodeIdPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/23595_node_experiment/23595_node.txt";
+        final String nodeIdPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/16185_node_experiment/9463_node_only.txt";
         final String storeNamePath = "/Users/jcsai/Downloads/storeName";
-        final String termPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/23595_node_experiment/term_remove_records_without_nodeId.txt";
-        final String outputPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/23595_node_experiment/testdata_remove_records_without_nodeId";
+        final String termPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/sable data/term.txt";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/Taxonomy Search/16185_node_experiment/9463_node_keyword";
 
         generator.run(nodeIdPath, storeNamePath, termPath, outputPath);
     }
