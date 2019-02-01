@@ -11,6 +11,13 @@ import org.apache.spark.sql.SparkSession;
  * Join keywords traffic data and free search channel ops data
  * to generate keywords page level ops data.
  *
+ * Transform Redshift function to Spark SQL function.
+ * 1. Upgrade Spark version to 2.3.1 or higher version，such as 2.4.0 to use date_trunc function.
+ * from date_trunc('day',convert_timezone('UTC','MESZ', t.start_time))
+ * to date_trunc('DAY',convert_timezone('UTC','MESZ', t.start_time))
+ * 2. Replace Redshift function convert_timezone('UTC','MESZ', t.start_time)
+ * to Spark function from_utc_timestamp(t.start_time, 'MESZ')
+ *
  * @author cn-seo-dev@
  */
 @RequiredArgsConstructor
@@ -36,10 +43,12 @@ public class OpsJoiner {
             "\tFROM tommy t\n" +
             "\t\tJOIN transits ot\n" +
             "\t\t\tON  t.marketplace_id = ot.marketplace_id\n" +
-            "\t\t\tAND date_trunc('DAY',convert_timezone('UTC','MESZ', t.start_time)) = ot.first_viewed_page_day\n" +
+//            "\t\t\tAND date_trunc('DAY',convert_timezone('UTC','MESZ', t.start_time)) = ot.first_viewed_page_day\n" +
+            "\t\t\tAND date_trunc('DAY',from_utc_timestamp(t.start_time, 'MESZ')) = ot.first_viewed_page_day\n" +
             "\t\t\tAND t.start_time = ot.first_viewed_page_day\n" +
             "\t\t\tAND t.session_id = ot.session_id\n" +
 //            "\t\t\tAND (t.request_id = ot.transit_event_id_rid OR convert_timezone('UTC','MESZ', t.start_time) between ot.first_viewed_page_datetime AND ot.last_viewed_page_datetime)\n" +
+            "\t\t\tAND (t.request_id = ot.transit_event_id_rid OR from_utc_timestamp(t.start_time,'MESZ') between ot.first_viewed_page_datetime AND ot.last_viewed_page_datetime)\n" +
             ")\n" +
             "SELECT\n" +
             "\tmarketplace_id, session_id, request_id, page_type, page_id, device_type, query_group_id, action_id,\n" +
@@ -83,9 +92,9 @@ public class OpsJoiner {
     }
 
     public static void main(String[] args) {
-        final String opsInputPath = "/Users/jcsai/keywords_ops_change";
-        final String trafficInputPath = "/Users/jcsai/keywords_traffic";
-        final String outputPath = "/Users/jcsai/keywords_output";
+        final String opsInputPath = "/Users/jcsai/Downloads/My Project/ops_data_provider/keywords/keywords_ops_data";
+        final String trafficInputPath = "/Users/jcsai/Downloads/My Project/ops_data_provider/keywords/keywords_traffic_data";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/ops_data_provider/keywords/join_output";
 
         final SparkSession sparkSession = SparkSession.builder().appName("opsJoiner").master("local").getOrCreate();
         final OpsJoiner opsJoiner = new OpsJoiner(sparkSession);
