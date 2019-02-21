@@ -12,9 +12,9 @@ import org.apache.spark.sql.SparkSession;
  * to generate keywords page level ops data.
  *
  * Transform Redshift function to Spark SQL function.
- * 1. Upgrade Spark version to 2.3.1 or higher version，such as 2.4.0 to use date_trunc function.
+ * 1. Upgrade Spark version to 2.3.0 or higher version，such as 2.4.0 to use date_trunc function.
  * from date_trunc('day',convert_timezone('UTC','MESZ', t.start_time))
- * to date_trunc('DAY',convert_timezone('UTC','MESZ', t.start_time))
+ * to date_trunc('day',convert_timezone('UTC','MESZ', t.start_time))
  * 2. Replace Redshift function convert_timezone('UTC','MESZ', t.start_time)
  * to Spark function from_utc_timestamp(t.start_time, 'MESZ')
  *
@@ -43,8 +43,8 @@ public class OpsJoiner {
             "\tFROM tommy t\n" +
             "\t\tJOIN transits ot\n" +
             "\t\t\tON  t.marketplace_id = ot.marketplace_id\n" +
-//            "\t\t\tAND date_trunc('DAY',convert_timezone('UTC','MESZ', t.start_time)) = ot.first_viewed_page_day\n" +
-            "\t\t\tAND date_trunc('DAY',from_utc_timestamp(t.start_time, 'MESZ')) = ot.first_viewed_page_day\n" +
+//            "\t\t\tAND date_trunc('day',convert_timezone('UTC','MESZ', t.start_time)) = ot.first_viewed_page_day\n" +
+            "\t\t\tAND date_trunc('day',from_utc_timestamp(t.start_time, 'MESZ')) = ot.first_viewed_page_day\n" +
             "\t\t\tAND t.start_time = ot.first_viewed_page_day\n" +
             "\t\t\tAND t.session_id = ot.session_id\n" +
 //            "\t\t\tAND (t.request_id = ot.transit_event_id_rid OR convert_timezone('UTC','MESZ', t.start_time) between ot.first_viewed_page_datetime AND ot.last_viewed_page_datetime)\n" +
