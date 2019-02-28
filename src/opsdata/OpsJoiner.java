@@ -2,10 +2,13 @@ package opsdata;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.spark.api.java.function.ForeachFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.storage.StorageLevel;
+import org.apache.spark.util.LongAccumulator;
 
 /**
  * OpsJoiner.
@@ -110,21 +113,29 @@ public class OpsJoiner {
     private final SparkSession sparkSession;
 
     private void join(final String channelOpsInputPath, final String trafficInputPath, final String outputPath) {
-        final Dataset<Row> channelOpsDF = readOPS(channelOpsInputPath).cache();
+        final Dataset<Row> channelOpsDF = read(channelOpsInputPath).cache();
         final Dataset<Row> trafficDF = read(trafficInputPath).cache();
 
 //        channelOpsDF.show(2);
 //        trafficDF.show(2);
-        System.out.println("channelOpsDF row number: " + channelOpsDF.count());
-        System.out.println("trafficDF row number: " + trafficDF.count());
+//        System.out.println("channelOpsDF row number: " + channelOpsDF.count());
+//        System.out.println("trafficDF row number: " + trafficDF.count());
+
+        LongAccumulator opsAccumulator = sparkSession.sparkContext().longAccumulator("ops");
+        LongAccumulator trafficAccumulator = sparkSession.sparkContext().longAccumulator("traffic");
+        channelOpsDF.foreach((ForeachFunction<Row>) row -> opsAccumulator.add(1L));
+        trafficDF.foreach((ForeachFunction<Row>) row -> trafficAccumulator.add(1L));
 
         channelOpsDF.createOrReplaceTempView("vadakkum_kw_otransits_de_1yr");
         trafficDF.createOrReplaceTempView("qianyuez_kw");
 
         final Dataset<Row> joinDF = sparkSession.sql(JOIN_QUERY);
 
-        joinDF.show();
-        System.out.println("joinDF row number: " + joinDF.count());
+//        joinDF.show();
+        LongAccumulator joinAccumulator = sparkSession.sparkContext().longAccumulator("join");
+        joinDF.foreach((ForeachFunction<Row>) row -> joinAccumulator.add(1L));
+//        System.out.println("joinDF row number: " + joinDF.count());
+
         write(joinDF, outputPath);
 
         sparkSession.catalog().clearCache();
@@ -184,9 +195,13 @@ public class OpsJoiner {
 //        final String trafficInputPath = "/Users/jcsai/Downloads/My Project/ops_data_provider/keywords/keywords_traffic_data";
 //        final String outputPath = "/Users/jcsai/Downloads/My Project/ops_data_provider/keywords/join_output";
 
-        final String opsInputPath = "s3://clickstream-full3/keywords_ops_data/2018-07-26/";
-        final String trafficInputPath = "s3://clickstream-full3/keywords_traffic_data_header/2018-07-26/";
-        final String outputPath = "s3://clickstream-full3/keywords_ops_join/2018-07-26/";
+//        final String opsInputPath = "s3://clickstream-full3/keywords_ops_data/2018-07-26/";
+//        final String trafficInputPath = "s3://clickstream-full3/keywords_traffic_data_header/2018-07-26/";
+//        final String outputPath = "s3://clickstream-full3/keywords_ops_join/2018-07-26/";
+
+        final String opsInputPath = "s3://clickstream-full3/keywords_ops_de_1yr/";
+        final String trafficInputPath = "s3://aaa-tommy/keywords/part_marketplace_id=4/";
+        final String outputPath = "s3://clickstream-full3/keywords_ops_de_join_1yr/";
 
         final SparkSession sparkSession = SparkSession.builder().appName("opsJoiner").getOrCreate();
         final OpsJoiner opsJoiner = new OpsJoiner(sparkSession);
