@@ -24,5 +24,5 @@ public class OffensiveKeyword implements Serializable {
 
     private String date_added;
 
-    private Double ops_loss;
+    private String ops_loss;
 }
