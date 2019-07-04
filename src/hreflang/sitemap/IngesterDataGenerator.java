@@ -11,6 +11,9 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 
+import java.sql.Timestamp;
+import java.util.Arrays;
+
 /**
  * Generate Ingester Data for Mapping Generator test.
  * Ingester Data has 6 columns: {id, href, hreflang, last_update_time, is_del, partition_id}
@@ -30,9 +33,16 @@ public class IngesterDataGenerator {
                 .drop("marketplace_id")
                 .withColumn("partition_id", functions.lit(1).cast(DataTypes.IntegerType));
 
-        inputDF.show(false);
+        // Add a new row.
+        final Timestamp timestamp = Timestamp.valueOf("2019-06-21 15:10:18.573");
+        final IngesterData newData = new IngesterData("ASIN2", "https://www.amazon.com/dp/ASIN2", "en-US", timestamp, 0, 1);
+        final Dataset<Row> newRowDF = sparkSession.createDataFrame(Arrays.asList(newData), IngesterData.class)
+                .select("id", "href", "hreflang", "last_update_time", "is_del", "partition_id");
 
-        inputDF.write()
+        final Dataset<Row> unionDF = inputDF.union(newRowDF);
+        unionDF.show(false);
+
+        unionDF.coalesce(1).write()
                 .mode(SaveMode.Append)
                 .partitionBy("partition_id")
                 .parquet(outputPath);
