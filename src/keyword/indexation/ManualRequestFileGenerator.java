@@ -41,7 +41,8 @@ public class ManualRequestFileGenerator {
         final Dataset<Row> inputDF = sparkSession.read()
                 .option("header", true)
                 .option("delimiter", "\t")
-                .csv(inputPath).cache();
+                .csv(inputPath)
+                .distinct().cache();
 
         System.out.println("################## " + inputDF.count());
         inputDF.printSchema();
@@ -84,6 +85,7 @@ public class ManualRequestFileGenerator {
          * the same row is saved as a,,"",1. To restore the previous behavior, set the CSV option emptyValue to empty (not quoted) string.
          */
         outputDS.select("marketplace_id", "page_id", "keywords", "transits", "ops", "index", "index_reason")
+                .distinct()
                 .coalesce(1)
                 .write()
                 .mode(SaveMode.Overwrite)
