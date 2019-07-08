@@ -54,7 +54,7 @@ public class ManualRequestFileGenerator {
                 .withColumn("transits", functions.lit(null).cast(DataTypes.IntegerType))
                 .withColumn("ops", functions.lit(null).cast(DataTypes.DoubleType))
                 .withColumn("index", functions.lit(1).cast(DataTypes.IntegerType))
-                .withColumn("index_reason", functions.lit("MM Request").cast(DataTypes.StringType))
+                .withColumn("index_reason", functions.lit("MM Request(1)").cast(DataTypes.StringType))
                 .as(Encoders.bean(ManualRequestData.class));
 
         renamedDS.printSchema();
