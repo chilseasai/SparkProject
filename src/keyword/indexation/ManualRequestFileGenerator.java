@@ -37,7 +37,7 @@ public class ManualRequestFileGenerator {
 
     private final SparkSession sparkSession;
 
-    public void generate(final String inputPath, final String outputPath) {
+    public void generate(final String inputPath, final String outputPath, final long marketplaceId) {
         final Dataset<Row> inputDF = sparkSession.read()
                 .option("header", true)
                 .option("delimiter", "\t")
@@ -49,7 +49,7 @@ public class ManualRequestFileGenerator {
 
         final Dataset<ManualRequestData> renamedDS = inputDF.drop("original_url", "noindex")
                 .withColumnRenamed("canonical_page_id", "page_id")
-                .withColumn("marketplace_id", functions.lit(44551).cast(DataTypes.IntegerType))
+                .withColumn("marketplace_id", functions.lit(marketplaceId).cast(DataTypes.IntegerType))
                 .withColumn("keywords", functions.lit(StringUtils.EMPTY).cast(DataTypes.StringType))
                 .withColumn("transits", functions.lit(null).cast(DataTypes.IntegerType))
                 .withColumn("ops", functions.lit(null).cast(DataTypes.DoubleType))
@@ -59,6 +59,7 @@ public class ManualRequestFileGenerator {
 
         renamedDS.printSchema();
 
+        // Set keywords
         final Dataset<ManualRequestData> outputDS = renamedDS.map((MapFunction<ManualRequestData, ManualRequestData>) row -> {
             final String pageId = row.getPage_id();
             final Matcher matcher1 = KEYWORDS_PATTERN_1.matcher(pageId);
@@ -97,12 +98,12 @@ public class ManualRequestFileGenerator {
     }
 
     public static void main(String[] args) {
-        final String inputPath = "/Users/jcsai/Downloads/My Project/hreflang_sitemap/index_override/es-noindex.csv";
-        final String outputPath = "/Users/jcsai/Downloads/My Project/hreflang_sitemap/index_override/manual_request";
+        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/it-noindex.csv";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/manual_request_override/it/";
 
         final SparkSession sparkSession = SparkSession.builder().master("local").getOrCreate();
         final ManualRequestFileGenerator generator = new ManualRequestFileGenerator(sparkSession);
-        generator.generate(inputPath, outputPath);
+        generator.generate(inputPath, outputPath, 35691);
 
     }
 }
