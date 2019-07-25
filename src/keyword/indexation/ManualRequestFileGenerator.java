@@ -98,12 +98,12 @@ public class ManualRequestFileGenerator {
     }
 
     public static void main(String[] args) {
-        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/it-noindex.csv";
-        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/manual_request_override/it/";
+        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/es-noindex-new.csv";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/manual_request_override/es/";
 
         final SparkSession sparkSession = SparkSession.builder().master("local").getOrCreate();
         final ManualRequestFileGenerator generator = new ManualRequestFileGenerator(sparkSession);
-        generator.generate(inputPath, outputPath, 35691);
+        generator.generate(inputPath, outputPath, 44551);
 
     }
 }
