@@ -45,7 +45,6 @@ public class ManualRequestFileGenerator {
                 .distinct().cache();
 
         System.out.println("################## " + inputDF.count());
-        inputDF.printSchema();
 
         final Dataset<ManualRequestData> renamedDS = inputDF.drop("original_url", "noindex")
                 .withColumnRenamed("canonical_page_id", "page_id")
@@ -56,8 +55,6 @@ public class ManualRequestFileGenerator {
                 .withColumn("index", functions.lit(1).cast(DataTypes.IntegerType))
                 .withColumn("index_reason", functions.lit("MM Request(1)").cast(DataTypes.StringType))
                 .as(Encoders.bean(ManualRequestData.class));
-
-        renamedDS.printSchema();
 
         // Set keywords
         final Dataset<ManualRequestData> outputDS = renamedDS.map((MapFunction<ManualRequestData, ManualRequestData>) row -> {
@@ -98,12 +95,12 @@ public class ManualRequestFileGenerator {
     }
 
     public static void main(String[] args) {
-        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/es-noindex-new.csv";
-        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/manual_request_override/es/";
+        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/it-noindex-new.csv";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/manual_request_override/it/";
 
         final SparkSession sparkSession = SparkSession.builder().master("local").getOrCreate();
         final ManualRequestFileGenerator generator = new ManualRequestFileGenerator(sparkSession);
-        generator.generate(inputPath, outputPath, 44551);
+        generator.generate(inputPath, outputPath, 35691);
 
     }
 }
