@@ -1,7 +1,7 @@
 /**
  * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  */
-package hreflang.sitemap;
+package hreflang.sitemap.ingester;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
