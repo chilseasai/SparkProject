@@ -20,6 +20,10 @@ import java.io.Serializable;
 
 /**
  * MappingGeneratorTester
+ * Validate the data of mapping generator.
+ * Test strategy:
+ * 1. The loc has the same id (ASIN) with other Alternates within the same link.
+ * 2. The same id (ASIN) can't be found from other row.
  *
  * @author cn-seo-dev@
  */
@@ -37,7 +41,7 @@ public class MappingGeneratorTester implements Serializable {
         System.out.println("input data:" + longAccumulator.value());
         longAccumulator.reset();
 
-        // ASIN consistency check
+        // id(ASIN) consistency check in one row
         final Dataset<HreflangData> asinConsistencyDS = hreflangDS.filter((FilterFunction<HreflangData>) row -> {
             final String locAsin = getASIN(row.getLoc());
             for (final AlternateData alternate : row.getLink()) {
@@ -59,6 +63,7 @@ public class MappingGeneratorTester implements Serializable {
                     .build(),
             Encoders.bean(AggCheckData.class));
 
+        // id(ASIN) uniqueness in all row
         final Dataset<Row> aggCheckDF = simplifiedDS.withColumn("numOfAlter2", functions.count("loc").over(Window.partitionBy("id")).cast(DataTypes.IntegerType))
                 .filter((FilterFunction<Row>) row -> {
                     final int aggNum = row.getAs("numOfAlter2");
