@@ -1,3 +1,3 @@
 # SparkProject
 
-Some small Spark tools uesd at work.
+Some small Spark tools uesd in work.
