@@ -57,23 +57,24 @@ public class ManualRequestFileGenerator {
                 .as(Encoders.bean(ManualRequestData.class));
 
         // Set keywords
-        final Dataset<ManualRequestData> outputDS = renamedDS.map((MapFunction<ManualRequestData, ManualRequestData>) row -> {
-            final String pageId = row.getPage_id();
-            final Matcher matcher1 = KEYWORDS_PATTERN_1.matcher(pageId);
-            if (matcher1.find()) {
-                final String keywords = matcher1.group(1);
-                row.setKeywords(keywords);
-                return row;
-            }
+        final Dataset<ManualRequestData> outputDS = renamedDS.filter("page_id is not null")
+                .map((MapFunction<ManualRequestData, ManualRequestData>) row -> {
+                    final String pageId = row.getPage_id();
+                    final Matcher matcher1 = KEYWORDS_PATTERN_1.matcher(pageId);
+                    if (matcher1.find()) {
+                        final String keywords = matcher1.group(1);
+                        row.setKeywords(keywords);
+                        return row;
+                    }
 
-            final Matcher matcher2 = KEYWORDS_PATTERN_2.matcher(pageId);
-            if (matcher2.find()) {
-                final String keywords = matcher2.group(1);
-                row.setKeywords(keywords);
-                return row;
-            }
-            return row;
-        }, Encoders.bean(ManualRequestData.class));
+                    final Matcher matcher2 = KEYWORDS_PATTERN_2.matcher(pageId);
+                    if (matcher2.find()) {
+                        final String keywords = matcher2.group(1);
+                        row.setKeywords(keywords);
+                        return row;
+                    }
+                    return row;
+                }, Encoders.bean(ManualRequestData.class));
 
 
         /**
@@ -95,12 +96,12 @@ public class ManualRequestFileGenerator {
     }
 
     public static void main(String[] args) {
-        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/it-noindex-new.csv";
-        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-07-24/manual_request_override/it/";
+        final String inputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-10-28/us-noindex.txt";
+        final String outputPath = "/Users/jcsai/Downloads/My Project/keyword_indexation/index_override/2019-10-28/manual_request_override/us/";
 
         final SparkSession sparkSession = SparkSession.builder().master("local").getOrCreate();
         final ManualRequestFileGenerator generator = new ManualRequestFileGenerator(sparkSession);
-        generator.generate(inputPath, outputPath, 35691);
+        generator.generate(inputPath, outputPath, 1);
 
     }
 }
